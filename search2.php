@@ -1,14 +1,45 @@
 <?php
-define ('DB_SERVER', 'localhost');
-define ('DB_USERNAME', 'root');
-define ('DB_PASSWORD', '');
-define ('DB_NAME', 'marktplaats');
+require_once "config.php";
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$output = '';
 
-$link = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
+if(isset($_POST['search'])) {
+  $search = $_POST['search'];
 
-if ($link ===false){ 
-    die("ERROR: Could not connect. " . mysqli_connect_error());
+
+$query = mysqli_query ("SELECT * from artikelen WHERE titel LIKE '%$search%' ") or die ("Could not search");
+
+$count = mysqli_num_rows($query);
+    
+if($count == 0){
+  $output = "Geen gevonden resultaten";
+
+}else{
+
+    while ($row = mysqli_fetch_array($query)) {
+        $titel = $row ['titel'];
+        $text = $row ['text']; 
+
+       
+        $output .='<div> '.$titel.''.$text.'</div>';
+    }
+}
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>index</title>
+</head>
+<body>
+    <form action="<?php echo htmlspecialchars ($_SERVER["PHP_SELF"]); ?>" method="GET">
+        <input type="text" name="query" />
+        <input type="submit" value="Search" />
+</form>
+<?php print ("$output");?>
+</body>
+</html>
